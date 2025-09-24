@@ -549,13 +549,27 @@ const CameraModal = ({ camera, onClose, onSave }) => {
     try {
       const submitData = { ...formData };
       
+      // Validate required fields
+      if (!submitData.name || !submitData.model || !submitData.serial_number || !submitData.arrival_date) {
+        setError('Пожалуйста, заполните все обязательные поля');
+        setLoading(false);
+        return;
+      }
+      
       // Convert date strings to ISO format
       if (submitData.arrival_date) {
-        submitData.arrival_date = new Date(submitData.arrival_date).toISOString();
+        submitData.arrival_date = new Date(submitData.arrival_date + 'T00:00:00.000Z').toISOString();
       }
       if (submitData.warranty_date) {
-        submitData.warranty_date = new Date(submitData.warranty_date).toISOString();
+        submitData.warranty_date = new Date(submitData.warranty_date + 'T00:00:00.000Z').toISOString();
       }
+
+      // Remove empty optional fields
+      Object.keys(submitData).forEach(key => {
+        if (submitData[key] === '' && key !== 'name' && key !== 'model' && key !== 'serial_number' && key !== 'arrival_date') {
+          delete submitData[key];
+        }
+      });
 
       if (camera) {
         // Update existing camera
@@ -568,6 +582,7 @@ const CameraModal = ({ camera, onClose, onSave }) => {
       onSave();
       onClose();
     } catch (error) {
+      console.error('Camera save error:', error);
       setError(error.response?.data?.detail || 'Ошибка при сохранении камеры');
     } finally {
       setLoading(false);
