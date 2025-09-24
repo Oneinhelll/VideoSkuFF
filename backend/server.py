@@ -234,6 +234,19 @@ async def create_camera(
     current_user: User = Depends(require_role(["admin", "manager"]))
 ):
     camera_dict = camera.dict()
+    
+    # Convert string dates to datetime objects
+    try:
+        if camera_dict.get('arrival_date'):
+            camera_dict['arrival_date'] = datetime.fromisoformat(camera_dict['arrival_date'].replace('Z', '+00:00'))
+        if camera_dict.get('warranty_date'):
+            camera_dict['warranty_date'] = datetime.fromisoformat(camera_dict['warranty_date'].replace('Z', '+00:00'))
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid date format: {str(e)}"
+        )
+    
     camera_obj = Camera(**camera_dict)
     
     # Check if serial number already exists
