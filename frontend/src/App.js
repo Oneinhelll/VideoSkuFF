@@ -171,6 +171,7 @@ const Dashboard = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCamera, setEditingCamera] = useState(null);
   const [maintenanceLogs, setMaintenanceLogs] = useState({});
+  const [showReports, setShowReports] = useState(false);
 
   useEffect(() => {
     loadData();
