@@ -78,10 +78,10 @@ class CameraCreate(BaseModel):
     name: str
     model: str
     serial_number: str
-    arrival_date: datetime
+    arrival_date: str  # Accept string and convert to datetime
     location: Optional[str] = None
     responsible_user: Optional[str] = None
-    warranty_date: Optional[datetime] = None
+    warranty_date: Optional[str] = None  # Accept string and convert to datetime
     maintenance_schedule: Optional[str] = None
     notes: Optional[str] = None
 
@@ -89,11 +89,11 @@ class CameraUpdate(BaseModel):
     name: Optional[str] = None
     model: Optional[str] = None
     serial_number: Optional[str] = None
-    arrival_date: Optional[datetime] = None
+    arrival_date: Optional[str] = None  # Accept string and convert to datetime
     status: Optional[str] = None
     location: Optional[str] = None
     responsible_user: Optional[str] = None
-    warranty_date: Optional[datetime] = None
+    warranty_date: Optional[str] = None  # Accept string and convert to datetime
     maintenance_schedule: Optional[str] = None
     notes: Optional[str] = None
 
