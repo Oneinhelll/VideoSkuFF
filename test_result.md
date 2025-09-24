@@ -236,15 +236,11 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Authentication system (JWT)"
-    - "Camera CRUD operations"
-    - "User management with roles"
-    - "Maintenance logging system"
-    - "Statistics and reporting API"
+  current_focus: []
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
+  backend_testing_complete: true
 
 agent_communication:
   - agent: "main"
