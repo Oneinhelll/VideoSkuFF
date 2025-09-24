@@ -307,6 +307,18 @@ async def update_camera(
     update_data = {k: v for k, v in camera_update.dict().items() if v is not None}
     update_data["updated_at"] = datetime.now(timezone.utc)
     
+    # Convert string dates to datetime objects
+    try:
+        if update_data.get('arrival_date'):
+            update_data['arrival_date'] = datetime.fromisoformat(update_data['arrival_date'].replace('Z', '+00:00'))
+        if update_data.get('warranty_date'):
+            update_data['warranty_date'] = datetime.fromisoformat(update_data['warranty_date'].replace('Z', '+00:00'))
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid date format: {str(e)}"
+        )
+    
     # Check serial number uniqueness if being updated
     if "serial_number" in update_data:
         existing_camera = await db.cameras.find_one({
