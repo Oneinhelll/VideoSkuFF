@@ -503,7 +503,16 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Add/Edit Camera Modal would go here */}
+      {/* Reports Modal */}
+      {showReports && (
+        <ReportsModal
+          cameras={cameras}
+          stats={stats}
+          onClose={() => setShowReports(false)}
+        />
+      )}
+
+      {/* Add/Edit Camera Modal */}
       {(showAddModal || editingCamera) && (
         <CameraModal
           camera={editingCamera}
