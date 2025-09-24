@@ -527,6 +527,335 @@ const Dashboard = () => {
   );
 };
 
+// Reports Modal Component
+const ReportsModal = ({ cameras, stats, onClose }) => {
+  const [reportType, setReportType] = useState('general');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const filteredCameras = cameras.filter(camera => {
+    let matches = true;
+    
+    if (selectedStatus && camera.status !== selectedStatus) {
+      matches = false;
+    }
+    
+    if (dateFrom && new Date(camera.arrival_date) < new Date(dateFrom)) {
+      matches = false;
+    }
+    
+    if (dateTo && new Date(camera.arrival_date) > new Date(dateTo)) {
+      matches = false;
+    }
+    
+    return matches;
+  });
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('ru-RU');
+  };
+
+  const getCurrentDateTime = () => {
+    return new Date().toLocaleString('ru-RU');
+  };
+
+  const getStatusText = (status) => {
+    const texts = {
+      active: 'Активна',
+      maintenance: 'Обслуживание',
+      inactive: 'Неактивна',
+      disposed: 'Списана'
+    };
+    return texts[status] || status;
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div className="relative top-10 mx-auto p-5 border max-w-6xl shadow-lg rounded-md bg-white">
+        <div className="mt-3">
+          {/* Header - Hide on print */}
+          <div className="no-print">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-medium text-gray-900">Отчеты по видеокамерам</h3>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Report Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Тип отчета</label>
+                <select
+                  value={reportType}
+                  onChange={(e) => setReportType(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  <option value="general">Общий отчет</option>
+                  <option value="status">По статусам</option>
+                  <option value="statistics">Статистический отчет</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">С даты</label>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">По дату</label>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Статус</label>
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  <option value="">Все статусы</option>
+                  <option value="active">Активна</option>
+                  <option value="maintenance">Обслуживание</option>
+                  <option value="inactive">Неактивна</option>
+                  <option value="disposed">Списана</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end mb-6">
+              <button
+                onClick={handlePrint}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Печать отчета
+              </button>
+            </div>
+          </div>
+
+          {/* Report Content - Printable */}
+          <div className="print-content">
+            {/* Report Header */}
+            <div className="text-center mb-8 print-break-before">
+              <div className="flex items-center justify-center mb-4">
+                <div className="h-12 w-12 bg-indigo-600 rounded-lg flex items-center justify-center mr-4">
+                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Система учета видеокамер</h1>
+                  <p className="text-lg text-gray-600">Отчет по состоянию на {getCurrentDateTime()}</p>
+                </div>
+              </div>
+            </div>
+
+            {reportType === 'general' && (
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Общий отчет по видеокамерам</h2>
+                
+                {/* Summary Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-indigo-600">{stats.total_cameras || 0}</div>
+                    <div className="text-sm text-gray-600">Всего камер</div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-green-600">{stats.active_cameras || 0}</div>
+                    <div className="text-sm text-gray-600">Активных</div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-yellow-600">{stats.maintenance_cameras || 0}</div>
+                    <div className="text-sm text-gray-600">На обслуживании</div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-red-600">{stats.expiring_warranty || 0}</div>
+                    <div className="text-sm text-gray-600">Истекает гарантия</div>
+                  </div>
+                </div>
+
+                {/* Cameras Table */}
+                <div className="overflow-hidden border border-gray-300">
+                  <table className="min-w-full divide-y divide-gray-300">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">№</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Название</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Модель</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Серийный номер</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Дата поступления</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Статус</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Расположение</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredCameras.map((camera, index) => (
+                        <tr key={camera.id}>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r">{index + 1}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 border-r">{camera.name}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r">{camera.model}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-mono border-r">{camera.serial_number}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r">{formatDate(camera.arrival_date)}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r">{getStatusText(camera.status)}</td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{camera.location || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {reportType === 'statistics' && (
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">Статистический отчет</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Status Distribution */}
+                  <div className="bg-white border border-gray-300 rounded-lg p-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Распределение по статусам</h3>
+                    <div className="space-y-3">
+                      {stats.status_distribution?.map((item, index) => (
+                        <div key={index} className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">{getStatusText(item._id)}:</span>
+                          <span className="font-semibold text-gray-900">{item.count}</span>
+                        </div>
+                      )) || <div className="text-gray-500">Нет данных</div>}
+                    </div>
+                  </div>
+
+                  {/* Summary Statistics */}
+                  <div className="bg-white border border-gray-300 rounded-lg p-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Общая статистика</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Всего камер:</span>
+                        <span className="font-semibold text-gray-900">{stats.total_cameras || 0}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Активных камер:</span>
+                        <span className="font-semibold text-green-600">{stats.active_cameras || 0}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">На обслуживании:</span>
+                        <span className="font-semibold text-yellow-600">{stats.maintenance_cameras || 0}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Истекает гарантия:</span>
+                        <span className="font-semibold text-red-600">{stats.expiring_warranty || 0}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Cameras */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Недавно добавленные камеры (последние 10)</h3>
+                  <div className="overflow-hidden border border-gray-300">
+                    <table className="min-w-full divide-y divide-gray-300">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Название</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Модель</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Дата поступления</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {cameras
+                          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                          .slice(0, 10)
+                          .map((camera) => (
+                          <tr key={camera.id}>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 border-r">{camera.name}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r">{camera.model}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r">{formatDate(camera.arrival_date)}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{getStatusText(camera.status)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {reportType === 'status' && (
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Отчет по статусам камер</h2>
+                
+                {['active', 'maintenance', 'inactive', 'disposed'].map((status) => {
+                  const statusCameras = filteredCameras.filter(c => c.status === status);
+                  if (statusCameras.length === 0) return null;
+                  
+                  return (
+                    <div key={status} className="mb-8">
+                      <h3 className="text-lg font-medium text-gray-900 mb-3">
+                        {getStatusText(status)} ({statusCameras.length} камер)
+                      </h3>
+                      <div className="overflow-hidden border border-gray-300">
+                        <table className="min-w-full divide-y divide-gray-300">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Название</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Модель</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">Серийный номер</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Расположение</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {statusCameras.map((camera) => (
+                              <tr key={camera.id}>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 border-r">{camera.name}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r">{camera.model}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-mono border-r">{camera.serial_number}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{camera.location || '-'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Report Footer */}
+            <div className="mt-8 text-center text-sm text-gray-500 border-t pt-4">
+              <p>Отчет сформирован {getCurrentDateTime()}</p>
+              <p>Система учета видеокамер</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Camera Modal Component
 const CameraModal = ({ camera, onClose, onSave }) => {
   const [formData, setFormData] = useState({
